@@ -80,7 +80,7 @@ def get_number_part_2(text):
 
 def main():
 
-    # print("Result of part 1 is:", solve(1))
+    print("Result of part 1 is:", solve(1))
     print("Result of part 2 is:", solve(2))
 
 
