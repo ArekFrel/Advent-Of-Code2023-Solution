@@ -1,5 +1,5 @@
-FILE = 'input_011.txt'
-# FILE = 'test_input.txt'
+FILE = '../inputs/input_01.txt'
+# FILE = '../inputs/test_input_01.txt'
 
 NUMBER_DICT = {
     "one": 1,
@@ -13,31 +13,30 @@ NUMBER_DICT = {
     "nine": 9
 }
 
+MIN_LEN = min([len(key) for key in NUMBER_DICT])
+
 
 def solve(part):
-    file = FILE
     value = 0
-    with open(file, 'r', encoding='utf-8') as input:
+    with open(FILE, 'r', encoding='utf-8') as my_input:
         if part == 1:
-            for line in input:
-                value += get_2_digit_number_1(line)
+            for line in my_input:
+                value += get_number_part_1(line)
         if part == 2:
-            for line in input:
-                value += get_2_digit_number_2(line)
+            for line in my_input:
+                value += get_number_part_2(line)
     return value
 
 
 def text_into_number(text):
 
-    number_dict = NUMBER_DICT
-    min_len = min([len(key) for key in NUMBER_DICT])
     changed_from_start, changed_from_end = False, False
     i, j = 0, 1
     while not changed_from_start and i <= len(text):
         if text[i].isdigit():
             changed_from_start = True
             break
-        if i >= min_len - 1:
+        if i >= MIN_LEN - 1:
             for key in NUMBER_DICT:
                 if key in text[:i + 1]:
                     text = text.replace(key, f'{NUMBER_DICT.get(key)}{key}', 1)
@@ -49,7 +48,7 @@ def text_into_number(text):
         if text[-j].isdigit():
             changed_from_end = True
             break
-        if j >= min_len - 1:
+        if j >= MIN_LEN - 1:
             for key in NUMBER_DICT:
                 if key in text[-(j + 1):]:
                     text = text[:len(text) - (j + 1)] + text[-(j + 1):].replace(key, f'{key}{NUMBER_DICT.get(key)}')
@@ -60,7 +59,7 @@ def text_into_number(text):
     return text
 
 
-def get_2_digit_number_1(text):
+def get_number_part_1(text):
 
     array = [_ for _ in text]
     digits = list(filter(lambda x: x.isdigit(), array))
@@ -69,7 +68,7 @@ def get_2_digit_number_1(text):
     return number
 
 
-def get_2_digit_number_2(text):
+def get_number_part_2(text):
 
     text = text_into_number(text)
     array = [_ for _ in text]
