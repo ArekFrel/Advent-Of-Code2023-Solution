@@ -1,5 +1,5 @@
-# FILE = '../inputs/input_03.txt'
-FILE = '../inputs/test_input_03.txt'
+FILE = '../inputs/input_03.txt'
+# FILE = '../inputs/test_input_03.txt'
 DAY = 3
 SOLVE_PART = 2
 with open(FILE, 'r', encoding='utf-8') as my_input:
@@ -18,7 +18,6 @@ def solve_part_1():
         signs = list(filter(lambda x: not str(x).isdigit() and x != '.' and x != '\n', signs))
         return len(signs) > 0
 
-    array_size = len(array)
     validated_numbers = []
 
     for line_index, line in enumerate(array):
@@ -37,7 +36,6 @@ def solve_part_1():
                 numbers_in_line.append(int(num))
                 num = ''
                 new_number = True
-        line_size = len(line)
         rows = row_calc(line_index)
         for number in numbers_in_line:
             index = indexes_of_numbers.pop(0)
@@ -49,18 +47,9 @@ def solve_part_1():
 
 def solve_part_2():
 
-    # def validation_number(rows, columns):
-    #     signs = []
-    #     first_id, last_id = columns
-    #     for row in rows:
-    #         row_slice = list(ARRAY[row][first_id: last_id])
-    #         signs += row_slice
-    #     signs = list(filter(lambda x: not str(x).isdigit() and x != '.' and x != '\n', signs))
-    #     return len(signs) > 0
-
     array = ARRAY
-    array_size = len(array)
     star_cords = []
+    validated_numbers = []
 
     def star_digit_neighbours(cords):
         neighbours = []
@@ -72,17 +61,23 @@ def solve_part_2():
                 if [row, column] == cords:
                     continue
                 if ARRAY[row][column].isdigit():
-                    neighbours.append([ARRAY[row][column], [row, column]])
+                    neighbours.append([row, column])
         return neighbours
 
     def number_by_cords(cords):
         number_array = []
         cord_row, cord_column = cords
         number_array.append(ARRAY[cord_row][cord_column])
-
-
-
-
+        next_col = cord_column + 1
+        while next_col <= len(ARRAY) - 1 and ARRAY[cord_row][next_col].isdigit() :
+            number_array.append(ARRAY[cord_row][next_col])
+            next_col += 1
+        prev_col = cord_column - 1
+        while prev_col >= 0 and ARRAY[cord_row][prev_col].isdigit():
+            number_array.insert(0, ARRAY[cord_row][prev_col])
+            prev_col -= 1
+        num = int(''.join(number_array))
+        return [num, cord_row, [prev_col + 1, next_col - 1]]
         
     for line_index, line in enumerate(array):
         for sign_index, sign in enumerate(line):
@@ -90,10 +85,17 @@ def solve_part_2():
                 star_cords.append([line_index, sign_index])
 
     for star in star_cords:
-        if len(star_digit_neighbours(star)) > 1:
-            print('got ya')
+        stars_neighbours = star_digit_neighbours(star)
+        if len(stars_neighbours) > 1:
+            numbers = []
+            for neighbour in stars_neighbours:
+                num = number_by_cords(neighbour)
+                if num not in numbers:
+                    numbers.append(num)
+            if len(numbers) == 2:
+                validated_numbers.append(numbers[0][0] * numbers[1][0])
 
-    print(star_cords)
+    print(f'Result of day {DAY} part {SOLVE_PART} is {sum(validated_numbers)}.')
 
 
 def row_calc(row):
