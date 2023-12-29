@@ -75,25 +75,25 @@ class Card:
         return sum(list(map(lambda x: x.counter, Card.cards)))
 
 
+def create_cards():
+    for index, line in enumerate(ARRAY, 1):
+        line = remove_double_space(line)
+        line = line[line.index(':') + 1:]
+        winning_numbers, shoots = line.split('|')
+        winning_numbers = [int(_) for _ in winning_numbers.strip().split(' ')]
+        shoots = [int(_) for _ in shoots.strip().rstrip().split(' ')]
+        Card(index, winning_numbers, shoots)
+
+
+def calculate():
+    Card.scratch()
+    return Card.count_cards()
+
+
 def solve_part_2():
 
-    def create_cards():
-        for index, line in enumerate(ARRAY, 1):
-            line = remove_double_space(line)
-            line = line[line.index(':') + 1:]
-            winning_numbers, shoots = line.split('|')
-            winning_numbers = [int(_) for _ in winning_numbers.strip().split(' ')]
-            shoots = [int(_) for _ in shoots.strip().rstrip().split(' ')]
-            Card(index, winning_numbers, shoots)
-
-    def calculate():
-        Card.scratch()
-        return Card.count_cards()
-
     create_cards()
-    result = calculate()
-    print(f'Result of day {DAY} part {SOLVE_PART} is {result}.')
-    return result
+    print(f'Result of day {DAY} part {SOLVE_PART} is {calculate()}.')
 
 
 def main():
