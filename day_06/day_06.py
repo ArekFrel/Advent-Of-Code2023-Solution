@@ -1,8 +1,8 @@
 import math
 
 DAY = __file__[-5:-3]
-FILE = f'../inputs/input_{DAY}.txt'
-# FILE = f'../inputs/test_input_{DAY}.txt'
+# FILE = f'../inputs/input_{DAY}.txt'
+FILE = f'../inputs/test_input_{DAY}.txt'
 SOLVE_PART = 2
 
 
