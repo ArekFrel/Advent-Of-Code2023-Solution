@@ -35,20 +35,12 @@ class Hand:
 
     def code_name(self):
         values = [sign for sign in string.ascii_lowercase[0:len(Hand.type_of_cards) + 1]]
-        dictionary = {k: v for k, v in zip(Hand.type_of_cards, values)}
-        return ''.join([dictionary.get(sign) for sign in self.cards])
+        dictionary = {k: v for k, v in zip(
+            map(lambda x: ord(x), Hand.type_of_cards),
+            map(lambda x: ord(x), values))}
 
-    # @staticmethod
-    # def compare_card(card_1, card_2):
-    #     rank_card_1 = Hand.type_of_cards.index(card_1)
-    #     rank_card_2 = Hand.type_of_cards.index(card_2)
-    #
-    #     if rank_card_1 < rank_card_2:
-    #         return card_1
-    #     if rank_card_1 > rank_card_2:
-    #         return card_2
-    #     if rank_card_1 == rank_card_2:
-    #         return 0
+        return self.cards.translate(dictionary)
+
 
     def type_of_hand(self):
         diff_cards = list(set([x for x in self.cards]))
