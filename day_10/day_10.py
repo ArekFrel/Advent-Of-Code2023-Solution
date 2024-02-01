@@ -1,8 +1,7 @@
-from math import prod
 DAY = __file__[-5:-3]
 FILE = f'../inputs/input_{DAY}.txt'
 # FILE = f'../inputs/test_input_{DAY}.txt'
-SOLVE_PART = 1
+SOLVE_PART = 2
 
 
 class PipeMap:
@@ -17,6 +16,9 @@ class PipeMap:
         self.trip_started = False
         self.steps_made = 0
         self.from_directions = []
+        self.loop = []
+        self.loop_dict = {}
+        self.loop_interior = 0
 
     def pipe_by_address(self, y, x):
         return self.data[y][x]
@@ -38,6 +40,9 @@ class PipeMap:
             self.second_trip_address = address_2
             self.trip_started = True
             self.steps_made += 1
+            self.loop.append(self.start)
+            self.loop.append(address_1)
+            self.loop.append(address_2)
             return None
 
         if self.trip_started:
@@ -47,6 +52,9 @@ class PipeMap:
             self.second_trip_address = self.connected_address(y2, x2, self.second_trip_from)
             self.second_trip_from = self.from_directions.pop()
             self.first_trip_from = self.from_directions.pop()
+            self.loop.append(self.first_trip_address)
+            if self.second_trip_address not in self.loop:
+                self.loop.append(self.second_trip_address)
             self.steps_made += 1
             return None
 
@@ -144,6 +152,38 @@ class PipeMap:
                     self.from_directions.append('west')
                     return PipeMap.east_neighbour(y, x)
 
+    def loop_calculation(self):
+        self.loop.sort(key=lambda x: x[0])
+        loop_ys = [y[0] for y in self.loop]
+        loop_ys = list(set(loop_ys))
+        for key in loop_ys:
+            value = [val[1] for val in self.loop if val[0] == key]
+            value.sort()
+            self.loop_dict[key] = value
+
+    def loop_interior_calculation(self):
+        for key in self.loop_dict:
+            vals = self.loop_dict[key].copy()
+            inside, from_up, from_down = False, False, False
+            prev_val = 0
+            for val in vals:
+                if inside:
+                    self.loop_interior += val - prev_val - 1
+                    if val - prev_val >= 2:
+                        print(f'key:{key} prev:{prev_val} val:{val}')
+                value = self.pipe_by_address(key, val)
+                if value == "|":
+                    inside = not inside
+                    from_up, from_down = from_down, from_up
+                if value in ['J', 'L']:
+                    from_up = not from_up
+                elif value in ['F', '7']:
+                    from_down = not from_down
+                if from_down and from_up:
+                    inside = not inside
+                    from_up, from_down = False, False
+                prev_val = val
+
     @staticmethod
     def north_neighbour(y, x):
         return y - 1, x
@@ -162,9 +202,15 @@ class PipeMap:
 
 
 def solve():
+
     mapa1 = PipeMap()
     mapa1.trip()
-    return mapa1.steps_made
+    if SOLVE_PART == 1:
+        return mapa1.steps_made
+    if SOLVE_PART == 2:
+        mapa1.loop_calculation()
+        mapa1.loop_interior_calculation()
+        return mapa1.loop_interior
 
 
 def main():
