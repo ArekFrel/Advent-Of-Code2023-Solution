@@ -4,7 +4,8 @@ import itertools
 DAY = __file__[-5:-3]
 FILE = f'../inputs/input_{DAY}.txt'
 # FILE = f'../inputs/test_input_{DAY}.txt'
-SOLVE_PART = 1
+SOLVE_PART = 2
+GALAXY_GROWTH = 1000000
 
 
 class Universe:
@@ -70,21 +71,27 @@ class Universe:
                 cols.append(col)
         return set(cols)
 
+    def cross_old_row_galaxy(self, rg):
+        rows = self.old_row_galaxies
+        row1, row2 = min(rg), max(rg)
+        second_set = set(range(row1, row2))
+        return len(rows.intersection(second_set))
 
-    def calc_distance(pair):
-        def cross_old_row_galaxy(rows, rg):
-            i, j = min(rg), max(rg)
-            second_set = set(list(range(i,j + 1)))
-            return len(rows.intersection(second_set))
+    def cross_old_col_galaxy(self, rg):
+        cols = self.old_column_galaxies
+        col1, col2 = min(rg), max(rg)
+        second_set = set(range(col1, col2))
+        return len(cols.intersection(second_set))
 
-        def cross_old_col_galaxy():
-            pass
+    def calc_distance(self, pairs):
 
-
-        galaxy_1, galaxy_2 = pair
-        i1, j1 = galaxy_1
-        i2, j2 = galaxy_2
-        return abs(i1 - i2) + abs(j1 - j2) + 1000000 * cross_old_row_galaxy(self.get_old_row_galaxies)
+        (i1, j1), (i2, j2) = pairs
+        if SOLVE_PART == 2:
+            row_cross = self.cross_old_row_galaxy((i1, i2))
+            col_cross = self.cross_old_col_galaxy((j1, j2))
+        else:
+            col_cross, row_cross = 0, 0
+        return abs(i1 - i2) + abs(j1 - j2) + (GALAXY_GROWTH - 1) * (col_cross + row_cross)
 
     def galaxies_combination(self):
         return list(itertools.combinations(self.galaxies, 2))
@@ -92,20 +99,13 @@ class Universe:
     def calculate_result(self):
         result = 0
         for pair in self.galaxies_pairs:
-            result += Universe.calc_distance(pair)
+            result += Universe.calc_distance(self, pair)
         return result
 
 
 def solve():
-
     universe = Universe()
-
-    if SOLVE_PART == 1:
-        return universe.calculate_result()
-    # if SOLVE_PART == 2:
-    #     mapa1.loop_calculation()
-    #     mapa1.loop_interior_calculation()
-    #     return mapa1.loop_interior
+    return universe.calculate_result()
 
 
 def main():
