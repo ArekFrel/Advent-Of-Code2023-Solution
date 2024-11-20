@@ -92,7 +92,6 @@ def find_smuge(arr_1, arr_2) -> bool:
 
 
 if __name__ == '__main__':
-    # print(find_smuge([_ for _ in '..###..##..'], [_ for _ in '..###..##.#']))
     main()
 
 
