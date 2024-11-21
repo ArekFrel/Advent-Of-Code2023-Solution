@@ -5,6 +5,7 @@ SOLVE_PART = 2
 MY_DICT = {}
 
 def main():
+
     rows = []
     with open(FILE, 'r', encoding='utf-8-sig') as my_input:
         for line in my_input:
@@ -16,8 +17,7 @@ def main():
             cols[i] = fall_rocks(cols[i])
         rows = [[_[i] for _ in cols] for i in range(len(cols[0]))]
     if SOLVE_PART == 2:
-        rows = cycle(rows, 100)
-    t = 0
+        rows = cycle(rows, 200)
     nums = [_ for _ in range(len(rows[0]), 0, -1)]
     result = 0
 
@@ -35,6 +35,10 @@ def cycle(arr, rounds):
 
     nums = [_ for _ in range(len(arr[0]), 0, -1)]
     for rnd in range(rounds):
+        arr_to_dict = [''.join(row) for row in arr]
+        arr_to_dict = ''.join(arr_to_dict)
+        if arr_to_dict in MY_DICT:
+
         result = 0
         arr = go_north(arr)
         arr = go_west(arr)
@@ -43,6 +47,8 @@ def cycle(arr, rounds):
         for i, j in zip(arr, nums):
             result += i.count('O') * j
         print(f'The result after round {rnd} is {result}')
+        if arr_to_dict not in MY_DICT:
+            MY_DICT[arr_to_dict] = result
     return arr
 
 
@@ -144,3 +150,4 @@ def go_east(arr) -> list:
 if __name__ == '__main__':
     # fall_rocks('OO.O.O..##')
     main()
+    t=0
