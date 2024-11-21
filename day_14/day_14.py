@@ -38,7 +38,7 @@ def cycle(arr, rounds):
         arr_to_dict = [''.join(row) for row in arr]
         arr_to_dict = ''.join(arr_to_dict)
         if arr_to_dict in MY_DICT:
-
+            return MY_DICT[arr_to_dict]
         result = 0
         arr = go_north(arr)
         arr = go_west(arr)
