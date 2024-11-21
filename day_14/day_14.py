@@ -32,24 +32,45 @@ def transform_arr(arr):
 
 
 def cycle(arr, rounds):
-
+    results = []
     nums = [_ for _ in range(len(arr[0]), 0, -1)]
-    for rnd in range(rounds):
-        arr_to_dict = [''.join(row) for row in arr]
-        arr_to_dict = ''.join(arr_to_dict)
-        if arr_to_dict in MY_DICT:
-            return MY_DICT[arr_to_dict]
+    arr_set = []
+    rnd_num = 1
+    for rnd in range(1, rounds + 1):
         result = 0
         arr = go_north(arr)
         arr = go_west(arr)
         arr = go_south(arr)
         arr = go_east(arr)
+
         for i, j in zip(arr, nums):
             result += i.count('O') * j
-        print(f'The result after round {rnd} is {result}')
-        if arr_to_dict not in MY_DICT:
-            MY_DICT[arr_to_dict] = result
+        results.append(result)
+        # print(f'The result after round {rnd} is {result}')
+        if arr not in arr_set:
+            arr_set.append(arr)
+        else:
+            break
+        # results.append(result)
+        rnd_num += 1
+    # print(rnd_num)
+    first = arr_set.index(arr) + 1
+    loop = rnd_num - first
+    a = (1000000000-first) % loop + first
+    print(f'{rnd_num=}')
+    print(f'{first=}')
+    print(f'{loop=}')
+    print(f'{a=}')
+    print(results[a])
     return arr
+
+
+def calculate_load(arr):
+    result = 0
+    nums = [_ for _ in range(len(arr[0]), 0, -1)]
+    for i, j in zip(arr, nums):
+        result += i.count('O') * j
+    return result
 
 
 def fall_rocks(col):
@@ -146,8 +167,19 @@ def go_east(arr) -> list:
     return new_arr
 
 
+def cal_dict():
+    for key in MY_DICT.keys():
+        adders = []
+        for i in range(len(MY_DICT[key]) - 1):
+            adders.append(MY_DICT[key][i + 1] - MY_DICT[key][i])
+        print(key, ' :', MY_DICT[key])
+
+
+
+
 
 if __name__ == '__main__':
     # fall_rocks('OO.O.O..##')
     main()
+    # cal_dict()
     t=0
