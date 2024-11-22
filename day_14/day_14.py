@@ -2,7 +2,7 @@ DAY = __file__[-5:-3]
 FILE = f'../inputs/input_{DAY}.txt'
 # FILE = f'../inputs/test_input_{DAY}.txt'
 SOLVE_PART = 2
-MY_DICT = {}
+MY_DICT = []
 
 
 def main():
@@ -17,51 +17,35 @@ def main():
         for i in range(len(cols)):
             cols[i] = fall_rocks(cols[i])
         rows = [[_[i] for _ in cols] for i in range(len(cols[0]))]
-    if SOLVE_PART == 2:
-        rows = cycle(rows, 1000)
-    nums = [_ for _ in range(len(rows[0]), 0, -1)]
-    result = 0
+        return calculate_load(rows)
 
-    for i, j in zip(rows, nums):
-        result += i.count('O') * j
-    print(f'The result is {result}')
+    if SOLVE_PART == 2:
+        rnd_num = 0
+        load_list = []
+        while True:
+            rnd_num += 1
+            rows = cycle(rows)
+            if rows in MY_DICT:
+                break
+            MY_DICT.append(rows)
+            rock_load = calculate_load(rows)
+            load_list.append(rock_load)
+        first = MY_DICT.index(rows) + 1
+        loop = rnd_num - first
+        bilion_equal_index = (1000000000 - first) % loop + first
+        result = load_list[bilion_equal_index - 1]
+        return result
 
 
 def transform_arr(arr):
     return [[_[i] for _ in arr] for i in range(len(arr[0]))]
 
 
-def cycle(arr, rounds):
-    results = []
-    nums = [_ for _ in range(len(arr[0]), 0, -1)]
-    arr_set = []
-    rnd_num = 1
-    for rnd in range(1, rounds + 1):
-        result = 0
-        arr = go_north(arr)
-        arr = go_west(arr)
-        arr = go_south(arr)
-        arr = go_east(arr)
-
-        for i, j in zip(arr, nums):
-            result += i.count('O') * j
-        results.append(result)
-        # print(f'The result after round {rnd} is {result}')
-        if arr not in arr_set:
-            arr_set.append(arr)
-        else:
-            break
-        # results.append(result)
-        rnd_num += 1
-    # print(rnd_num)
-    first = arr_set.index(arr) + 1
-    loop = rnd_num - first
-    a = (1000000000-first) % loop + first
-    print(f'{rnd_num=}')
-    print(f'{first=}')
-    print(f'{loop=}')
-    print(f'{a=}')
-    print(results[a])
+def cycle(arr, ):
+    arr = go_north(arr)
+    arr = go_west(arr)
+    arr = go_south(arr)
+    arr = go_east(arr)
     return arr
 
 
@@ -85,7 +69,6 @@ def fall_rocks(col):
         b = segment.count('O')
         seg = 'O' * b + '.' * (a - b)
         result.append(seg)
-        t = 0
     col = '#'.join(result)
     col = [_ for _ in col]
     return col
@@ -167,19 +150,5 @@ def go_east(arr) -> list:
     return new_arr
 
 
-def cal_dict():
-    for key in MY_DICT.keys():
-        adders = []
-        for i in range(len(MY_DICT[key]) - 1):
-            adders.append(MY_DICT[key][i + 1] - MY_DICT[key][i])
-        print(key, ' :', MY_DICT[key])
-
-
-
-
-
 if __name__ == '__main__':
-    # fall_rocks('OO.O.O..##')
-    main()
-    # cal_dict()
-    t=0
+    print(f'The result of part {SOLVE_PART} is {main()}')
