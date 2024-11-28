@@ -1,38 +1,49 @@
 import sys
 
-sys.setrecursionlimit(3000)
+sys.setrecursionlimit(4000)
 
 DAY = __file__[-5:-3]
-FILE = f'../inputs/input_{DAY}.txt'
-# FILE = f'../inputs/test_input_{DAY}.txt'
-SOLVE_PART = 2
+# FILE = f'../inputs/input_{DAY}.txt'
+FILE = f'../inputs/test_input_{DAY}.txt'
+SOLVE_PART = 1
 
+
+def formulate_grid():
+    with open(FILE, 'r', encoding='utf-8-sig') as my_input:
+        return [x.replace('\n', '') for x in my_input.readlines()]
+
+GRID = formulate_grid()
 
 class Beam:
 
-    @staticmethod
-    def formulate_grid():
-        with open(FILE, 'r', encoding='utf-8-sig') as my_input:
-            return [x[:-1] for x in my_input.readlines()]
-
-    grid = formulate_grid()
+    split_beams = []
     cords_met = []
     situations = []
+    best_score = 0
     went = 0
 
-    def __init__(self, direction, cord_y, cord_x):
+    def __init__(self, direction, cord_y, cord_x, do_clear=False):
+        if do_clear:
+            Beam.clear_data()
         self.cord_x = cord_x
         self.cord_y = cord_y
         self.direction = direction
-        self.split_beams = []
         self.go()
+        if do_clear:
+            if len(Beam.cords_met) > Beam.best_score:
+                Beam.best_score = len(Beam.cords_met)
 
+    @staticmethod
+    def clear_data():
+        Beam.cords_met.clear()
+        Beam.situations.clear()
+        Beam.split_beams.clear()
 
     def go(self):
         if any((self.cord_x < 0, self.cord_y < 0)):
             return None
         try:
-            meets = Beam.grid[self.cord_y][self.cord_x]
+            meets = GRID[self.cord_y][self.cord_x]
         except IndexError:
             return None
         if (self.cord_y, self.cord_x) not in Beam.cords_met:
@@ -88,12 +99,12 @@ class Beam:
             case '|':
                 match self.direction:
                     case "RIGHT":
-                        self.split_beams.append(Beam(direction='UP', cord_x=self.cord_x, cord_y=self.cord_y-1))
-                        self.split_beams.append(Beam(direction='DOWN', cord_x=self.cord_x, cord_y=self.cord_y+1))
+                        Beam.split_beams.append(Beam(direction='UP', cord_x=self.cord_x, cord_y=self.cord_y-1))
+                        Beam.split_beams.append(Beam(direction='DOWN', cord_x=self.cord_x, cord_y=self.cord_y+1))
                         return None
                     case "LEFT":
-                        self.split_beams.append(Beam(direction='UP', cord_x=self.cord_x, cord_y=self.cord_y-1))
-                        self.split_beams.append(Beam(direction='DOWN', cord_x=self.cord_x, cord_y=self.cord_y+1))
+                        Beam.split_beams.append(Beam(direction='UP', cord_x=self.cord_x, cord_y=self.cord_y-1))
+                        Beam.split_beams.append(Beam(direction='DOWN', cord_x=self.cord_x, cord_y=self.cord_y+1))
                         return None
 
                     case "UP":
@@ -121,12 +132,28 @@ class Beam:
         #     t = 0
 
 def main():
-    # with open(FILE, 'r', encoding='utf-8-sig') as my_input:
-    #     grid = [x[:-1] for x in my_input.readlines()]
-    #     a=0
-    beam = Beam(direction='RIGHT', cord_x=0, cord_y=0)
 
-    print(f'Result of day{DAY} part {SOLVE_PART} is {len(beam.cords_met)}')
+    if SOLVE_PART == 1:
+        # Beam(direction='RIGHT', cord_x=0, cord_y=0, do_clear=True)
+        beam = Beam(direction='RIGHT', cord_x=0, cord_y=0, do_clear=True)
+        a = 0
+
+    if SOLVE_PART == 2:
+        x_len = len(GRID[0])
+        y_len = len(GRID)
+        for x in range(x_len):
+            Beam(direction='DOWN', cord_x=x, cord_y=0, do_clear=True)
+            print(f'{x=} y =0  score = {len(Beam.cords_met)}')
+            Beam(direction='UP', cord_x=x, cord_y=y_len-1, do_clear=True)
+            print(f'{x=} y ={y_len-1}  score = {len(Beam.cords_met)}')
+        for y in range(y_len):
+            Beam(direction='RIGHT', cord_x=0, cord_y=y, do_clear=True)
+            print(f'x=0 y ={y}    score = {len(Beam.cords_met)}')
+            Beam(direction='LEFT', cord_x=x_len-1, cord_y=y, do_clear=True)
+            print(f'x={x_len-1} y ={y}    score = {len(Beam.cords_met)}')
+
+
+    print(f'Result of day{DAY} part {SOLVE_PART} is {Beam.best_score}')
 
 
 
