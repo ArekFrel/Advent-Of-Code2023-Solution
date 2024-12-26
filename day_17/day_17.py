@@ -1,82 +1,158 @@
+import sys
+from heapq import heappush, heappop
 DAY = __file__[-5:-3]
-# FILE = f'../inputs/input_{DAY}.txt'
-FILE = f'../inputs/test_input_{DAY}.txt'
-SOLVE_PART = 1
+FILE = f'../inputs/input_{DAY}.txt'
+# FILE = f'../inputs/test_input_{DAY}.txt'
+SOLVE_PART = 2
 
 def formulate_grid():
     with open(FILE, 'r', encoding='utf-8-sig') as my_input:
-        return [x.replace('\n', '') for x in my_input.readlines()]
+        lines = my_input.read().strip().split("\n")
+        return [[int(_) for _ in line] for line in lines]
 
 GRID = formulate_grid()
+Y = len(GRID)
+X = len(GRID[0])
 
-def formulate_score_grid():
-    y_len = len(GRID)
-    x_len = len(GRID[0])
-    score_grid = [[0 for _ in range(x_len)] for _ in range(y_len)]
-    return score_grid
+def solve():
 
-SCORE_GRID = formulate_score_grid()
+    dirs = [(0, 1) ,(-1, 0) ,(0, -1) ,(1, 0)]
+    pq = [(0, (0,0), None, 0)]
+    been_here = set()
+    result = 0
 
+    #returns reverse direction
+    dir_dict = {
+        0: 2,
+        1: 3,
+        2: 0,
+        3: 1
+    }
 
+    while pq:
+        score, loc, d, steps = heappop(pq)
+        # score is heatloss so far
+        # loc is (i,j) location
+        # d is direction recently went
+        # steps - number of steps in given direction
+        if (loc, d, steps) in been_here:
+            continue
+        been_here.add((loc, d, steps))
 
-class HeatLoss:
+        if SOLVE_PART == 1 and loc == (Y - 1, X - 1):
+            result = score
+            break
+        if SOLVE_PART == 2 and loc == (Y - 1, X - 1) and steps >= 4:
+            result = score
+            break
 
-    best_score = None
-    steps = []
+        y, x = loc
+        for new_dir in range(4):
+            if SOLVE_PART == 1:
+                if d is not None:
+                    if steps >= 3 and new_dir == d:
+                        continue
+                    if new_dir == dir_dict[d]:
+                        continue
 
-    CONTINUE_DIR = {'LEFT': 'RIGHT',
-              'RIGHT': 'LEFT',
-              'UP': 'DOWN',
-              'DOWN': 'UP'
-              }
+                dy, dx = dirs[new_dir]
+                yy = y + dy
+                xx = x + dx
+                if not (0 <= yy < Y and 0 <= xx < X):
+                    continue
+                if new_dir == d:
+                    assert steps < 3
+                    new_steps = steps + 1
+                else:
+                    new_steps = 1
+                new_score = score + GRID[yy][xx]
 
+            if SOLVE_PART == 2:
+                if d is not None:
+                    if steps < 4 and new_dir != d:
+                        continue
+                    if steps == 10 and new_dir == d:
+                        continue
+                    if new_dir == dir_dict[d]:
+                        continue
 
-    def __init__(self, y_cord, x_cord, dir_from, consecutive, score=0):
+                dy, dx = dirs[new_dir]
+                yy = y + dy
+                xx = x + dx
+                if not (0 <= yy < Y and 0 <= xx < X):
+                    continue
+                if new_dir == d:
+                    assert steps <= 10
+                    new_steps = steps + 1
+                else:
+                    new_steps = 1
+                    if d is not None:
+                        assert steps >= 4
+                new_score = score + GRID[yy][xx]
 
-        self.y_cord = y_cord
-        self.x_cord = x_cord
-        self.dir_from = dir_from
-        self.consecutive = consecutive
-        self.score = score + self.value()
+            heappush(pq, (new_score, (yy, xx), new_dir, new_steps))
 
+    return result
 
-    def next_options(self):
-        options_to_go = ['UP', 'RIGHT', 'DOWN', 'LEFT']
-        if self.dir_from:
-            options_to_go.remove(self.dir_from)
-        if self.consecutive == 3:
-            options_to_go.remove(self.continue_direction())
-        if self.x_cord == 0:
-            options_to_go.remove('LEFT')
-        if self.x_cord == len(GRID[0]) - 1:
-            options_to_go.remove('RIGHT')
-        if self.y_cord == 0:
-            options_to_go.remove('UP')
-        if self.x_cord == len(GRID) - 1:
-            options_to_go.remove('DOWN')
-        return options_to_go
+def solve_2():
 
+    dirs = [(0, 1), (-1, 0), (0, -1), (1, 0)]
+    pq = [(0, (0, 0), None, 0)]
+    been_here = set()
+    result = 0
 
+    # returns reverse direction
+    dir_dict = {
+        0: 2,
+        1: 3,
+        2: 0,
+        3: 1
+    }
 
-    def continue_direction(self):
-        return HeatLoss.CONTINUE_DIR[self.dir_from]
+    while pq:
+        score, loc, d, steps = heappop(pq)
+        # score is heatloss so far
+        # loc is (i,j) location
+        # d is direction recently went
+        # steps - number of steps in given direction
+        if (loc, d, steps) in been_here:
+            continue
+        been_here.add((loc, d, steps))
 
+        if loc == (Y - 1, X - 1) and steps >= 4:
+            result = score
+            break
 
-    def options(self):
-        for option in self.next_options():
-            self.go(option)
+        y, x = loc
+        for new_dir in range(4):
+            if d is not None:
+                if steps < 4 and new_dir != d:
+                    continue
+                if steps == 10 and new_dir == d:
+                    continue
+                if new_dir == dir_dict[d]:
+                    continue
 
+            dy, dx = dirs[new_dir]
+            yy = y + dy
+            xx = x + dx
+            if not (0 <= yy < Y and 0 <= xx < X):
+                continue
+            if new_dir == d:
+                assert steps <= 10
+                new_steps = steps + 1
+            else:
+                new_steps = 1
+                if d is not None:
+                    assert steps >= 4
 
+            new_score = score + GRID[yy][xx]
 
-
-
-
-    def value(self):
-        return int(GRID[self.y_cord][self.x_cord])
+            heappush(pq, (new_score, (yy, xx), new_dir, new_steps))
+    return result
 
 def main():
-    heat_loss = HeatLoss(0,0,None,0,0)
-    t=0
+    print(f'Result of day {DAY} part {SOLVE_PART} is {solve_2()}')
 
 
 if __name__ == '__main__':
