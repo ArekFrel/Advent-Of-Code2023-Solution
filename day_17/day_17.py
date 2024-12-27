@@ -152,7 +152,7 @@ def solve_2():
     return result
 
 def main():
-    print(f'Result of day {DAY} part {SOLVE_PART} is {solve_2()}')
+    print(f'Result of day {DAY} part {SOLVE_PART} is {solve()}')
 
 
 if __name__ == '__main__':
