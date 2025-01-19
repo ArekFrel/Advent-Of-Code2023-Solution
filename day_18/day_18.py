@@ -1,9 +1,9 @@
-import sys
 from heapq import heappush, heappop
 from copy import deepcopy
+
 DAY = __file__[-5:-3]
-# FILE = f'../inputs/input_{DAY}.txt'
-FILE = f'../inputs/test_input_{DAY}.txt'
+FILE = f'../inputs/input_{DAY}.txt'
+# FILE = f'../inputs/test_input_{DAY}.txt'
 SOLVE_PART = 2
 
 DIR_DICT = {
@@ -30,6 +30,7 @@ def formulate_grid_hex():
         new_grid.append(new_line)
 
     return new_grid
+
 if SOLVE_PART == 1:
     DIG_PLAN = formulate_grid()
 else:
@@ -41,6 +42,18 @@ DIGGED_SIGN = '#'
 # drawing an empty map of proper size
 def create_map  (y, x):
     return [[EMPTY_SIGN for _ in range(x)] for _ in range(y)]
+
+def read_test_map():
+    with open('mapa_test.txt', 'r', encoding='utf-8-sig') as map_input:
+        lines = map_input.read().strip().split("\n")
+        grid = [line.count('#') for line in lines]
+
+    for i in range(len(grid)):
+        if i == 0:
+            continue
+        grid[i] = grid[i] + grid[i-1]
+
+    return grid
 
 
 def solve_1():
@@ -159,18 +172,145 @@ def solve_1():
     for line in filled_map:
         result += line.count(DIGGED_SIGN)
 
-    # for x in filled_map:
-    #     print(''.join(x))
-    # print(f'Result of day {DAY} part {SOLVE_PART} is {result}')
-    #
-    # print(349 * '-')
-    #
-    # for x in dig_map:
-    #     print(''.join(x))
     print(f'Result of day {DAY} part {SOLVE_PART} is {result}')
 
 
-if __name__ == '__main__':
-    solve_1()
+def solve_2():
 
+    test_map = read_test_map()
+    temp_x = 0
+    temp_y = 0
+    point = [0, 0]
+    # digged_lines = []
+    hor_lines = []
+    # ver_lines = []
+
+    for line in DIG_PLAN:
+        d, val = line.split(' ')
+        val = int(val)
+        delta_r, delta_l, delta_d, delta_u = 0, 0, 0, 0
+        hor = False
+        match d:
+            case 'R':
+                temp_x += val
+
+                delta_r = val
+                hor = True
+            case 'L':
+                temp_x -= val
+
+                delta_l = val
+                hor = True
+            case 'D':
+                temp_y += val
+
+                delta_d = val
+            case 'U':
+                temp_y -= val
+                delta_u = val
+        point_s = point
+        point_f = [point_s[0] - delta_u + delta_d, point_s[1] - delta_l + delta_r]
+        dig = sorted([point_s[1], point_f[1]])
+        rec = (point_s[0], dig)
+        if hor:
+            assert point_s[0]== point_f[0]
+            heappush(hor_lines, rec)
+
+        point = point_f
+    hor_lines_list = []
+    result = 0
+    prev_y_cord = None
+    width = 0
+    result_tab = []
+    min_tab_val = None
+    while hor_lines:
+        hor_line = heappop(hor_lines)
+        y_cord , points = hor_line
+        if min_tab_val is None:
+            min_tab_val = y_cord
+        if prev_y_cord is not None:
+            result += width * (y_cord - prev_y_cord - 1)
+            result_tab.append([result, y_cord - min_tab_val - 1])
+        narrower = 0
+        if not hor_lines_list:
+            hor_lines_list.append(points)
+        else:
+            hor_lines_list, reducer = join_width(points, hor_lines_list)
+            narrower += reducer
+        try:
+            while hor_lines[0][0] == y_cord:
+                hor_lines_list, reducer = join_width(heappop(hor_lines)[1], hor_lines_list)
+                narrower += reducer
+        except IndexError:
+            pass
+        width = calc_width(hor_lines_list)
+        prev_y_cord = y_cord
+        result += width + narrower
+        result_tab.append([result, y_cord - min_tab_val])
+
+    return result
+
+
+def join_width(dig, lines: list):
+    reducer = 0
+    if dig in lines:
+        lines.remove(dig)
+        reducer = dig[1] - dig[0] + 1
+        return lines, reducer
+
+    changed = False
+
+    for i in range(len(lines)):
+        if i != len(lines) - 1:
+            if dig[0] == lines[i][1] and dig[1] == lines[i + 1][0]:
+                new_line = [lines[i][0], lines[i + 1][1]]
+                lines.remove(lines[i + 1])
+                lines.remove(lines[i])
+                lines.append(new_line)
+                lines.sort()
+                changed = True
+                break
+
+        if dig[0] == lines[i][0]:
+            lines[i] = [dig[1], lines[i][1]]
+            reducer = dig[1] - dig[0]
+            changed = True
+            break
+        elif dig[0] == lines[i][1]:
+            lines[i] = [lines[i][0], dig[1]]
+            changed = True
+            break
+        elif dig[1] == lines[i][1]:
+            lines[i] = [lines[i][0], dig[0]]
+            reducer = dig[1] - dig[0]
+            changed = True
+            break
+        elif dig[1] == lines[i][0]:
+            lines[i] = [dig[0], lines[i][1]]
+            changed = True
+            break
+
+        elif lines[i][0] < dig[0] < lines[i][1]:
+            lines.append([lines[i][0], dig[0]])
+            lines.append([dig[1], lines[i][1]])
+            lines.remove(lines[i])
+            lines.sort()
+            reducer = dig[1] - dig[0] -1
+            changed = True
+            break
+
+
+    if not changed:
+        lines.append(dig)
+        lines.sort()
+    return lines, reducer
+
+def calc_width(lines):
+    result = 0
+    for first, second in lines:
+        result += second - first + 1
+    return result
+
+if __name__ == '__main__':
+    print(f'Result of day {DAY} part {SOLVE_PART} is {solve_2()}')
 
