@@ -213,7 +213,7 @@ def solve_2():
         dig = sorted([point_s[1], point_f[1]])
         rec = (point_s[0], dig)
         if hor:
-            assert point_s[0]== point_f[0]
+            assert point_s[0] == point_f[0]
             heappush(hor_lines, rec)
 
         point = point_f
